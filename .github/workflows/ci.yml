@@ -1,0 +1,80 @@
+name: CI
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    container:
+      image: archlinux
+      volumes:
+        - ${{ github.workspace }}:/home/ci/github
+    steps:
+      - name: Install packages
+        run: pacman -Suy --noconfirm nodejs npm openssh
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 10
+
+      - name: Install npm packages
+        run: npm install
+        working-directory: /home/ci/github
+
+      - name: Build without specified environment
+        run: npm run build
+        working-directory: /home/ci/github
+
+      - name: Publish as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: production-build
+          path: /home/ci/github/build
+
+
+  deploy:
+    environment: production
+    runs-on: ubuntu-20.04
+    container:
+      image: archlinux
+      volumes:
+        - ${{ github.workspace }}:/home/ci/github
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 10
+
+      - name: Install packages
+        run: pacman -Suy --noconfirm nodejs npm openssh
+
+      - name: Install npm packages
+        run: npm install
+        working-directory: /home/ci/github
+
+      - name: Prepare environment
+        run: |
+          echo "${{ secrets.ENV }}" > .env.production
+        working-directory: /home/ci/github
+
+      - name: Build
+        run: npm run build
+        working-directory: /home/ci/github
+
+      - name: Publish as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: production-build
+          path: /home/ci/github/build
+
+      - name: Deploy
+        run: |
+          mkdir -p /root/.ssh
+          mkdir -p /home/ci/remote
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > /root/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /root/.ssh/id_ed25519
+          chmod 400 /root/.ssh/id_ed25519
+          scp -r * "${{ secrets.SSH_REMOTE }}"
+          rm /root/.ssh/id_ed25519
+        working-directory: /home/ci/github/build
