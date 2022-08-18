@@ -76,13 +76,13 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
       <tbody>
         {departures.map(d => (
           <tr key={d.stop.id + "/" + d.trip.id}>
-            <td className="font-monospace">
+            <td className="font-monospace p-0">
               <div className="d-inline-flex flex-row">
                 {dayjs(d.departure_timestamp.scheduled).format('H:mm')}
                 {delayed(d) && (<span className="ms-1 badge text-bg-warning">+&nbsp;{delayed(d)}</span>)}
               </div>
             </td>
-            <td>
+            <td className="p-0">
               <div className="d-inline-flex flex-row">
                 <RouteBadge type={d.route.type} name={d.route.short_name} />
                 <div className="fw-bold ms-2">{d.trip.headsign}</div>
@@ -125,7 +125,7 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
 
   return (
     <div className="p-1 bg-light border rounded-3">
-      <h4>{props.pidStopId}</h4>
+      <h4 className="mb-1">{props.pidStopId}</h4>
       <Error error={ error } />
       <Loading visible={ data === undefined } />
       <Infotexts data={ data ? ((data as any).infotexts as model.Infotext[]) : undefined } />
@@ -147,14 +147,12 @@ export default function DepartureBoard() {
   ]
 
   return (
-    <div className="container-fluid">
     <div className="row align-items-md-stretch">
       {boards.map(e => (
         <div className="col-sm-6 col-lg-6 col-xl-4 p-1" key={e.name}>
           <PIDDepartureBoard pidStopId={e.name} count={e.count} />
         </div>
       ))}
-    </div>
     </div>
   )
 
