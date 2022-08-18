@@ -16,7 +16,7 @@ import { todayEvent } from 'utils/time'
 import CurrentDateTime from "components/CurrentDateTime";
 import Calendar from 'components/calendar/calendar';
 import DepartureBoard from 'components/transport/pid/DepartureBoard';
-import Weather, { CurrentWeather, WeatherForecast } from 'components/weather/openweathermaps/weather';
+import Weather, { CurrentWeatherCompact, WeatherForecastCompact } from 'components/weather/openweathermaps/weather';
 
 const segments = [
   { path: "/smarthome/",         name: "/",         icon: ( <FontAwesomeIcon icon={solid("home")} /> ) },
@@ -59,18 +59,14 @@ function Footer({ authElement }: { authElement: React.ReactNode }) {
 
 const calendars = process.env.REACT_APP_GOOGLE_CALENDARS ? JSON.parse(process.env.REACT_APP_GOOGLE_CALENDARS) : []
 
-
 function Dashboard() {
   return (
-    <div className="container-fluid">
-       <div className="row mb-3">
-         <CurrentWeather lat={50.0988144} lon={14.3607961} compact />
-         <WeatherForecast lat={50.0988144} lon={14.3607961} compact short />
-       </div>
-       <div className="row mb-3">
-         <Calendar calendars={[calendars[0]]} n={3} datefilter={todayEvent} />
-       </div>
-    </div>
+    <React.Fragment>
+      <CurrentWeatherCompact lat={50.0988144} lon={14.3607961} />
+      <WeatherForecastCompact lat={50.0988144} lon={14.3607961} />
+      <div className="mb-2" />
+      <Calendar calendars={[calendars[0]]} n={3} datefilter={todayEvent} />
+    </React.Fragment>
   )
 }
 
