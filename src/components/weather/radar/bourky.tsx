@@ -28,7 +28,7 @@ function constructDates(n: number): dayjs.Dayjs[] {
    }, [firstDate])
 }
 
-function Images({ bounds, opacity, zIndex, dates }: { bounds: L.LatLngBoundsLiteral, opacity: number, zIndex: number, dates: dayjs.Dayjs[] }) {
+function Images({ bounds, dates }: { bounds: L.LatLngBoundsLiteral, dates: dayjs.Dayjs[] }) {
   const [n, setN] = useState<number>(0)
   const [animate, setAnimate] = useState<boolean>(true)
 
@@ -52,8 +52,14 @@ function Images({ bounds, opacity, zIndex, dates }: { bounds: L.LatLngBoundsLite
     <ImageOverlay
       url={`https://radar.bourky.cz/data/pacz2gmaps.z_max3d.${dates[n].utc().format('YYYYMMDD.HHmm')}.0.png`}
       bounds={bounds}
-      opacity={opacity}
-      zIndex={zIndex}
+      opacity={0.8}
+      zIndex={1}
+    />
+    <ImageOverlay
+      url={`https://radar.bourky.cz/data/celdn/pacz2gmaps6.blesk.${dates[n].utc().format('YYYYMMDD.HHmm')}.png`}
+      bounds={bounds}
+      opacity={1}
+      zIndex={2}
     />
     <div className="position-relative">
       <div className="position-absolute top-20 end-0" style={{zIndex: 1000}}>
@@ -97,7 +103,7 @@ export default function WeatherRadar({ lat, lon } : { lat: number, lon: number }
         attribution='&copy; <a href="http://www.mapy.cz">mapy.cz</a> by <a href="http://www.seznam.cz">Seznam.cz</a>, a.s.'
         url="http://mapserver.mapy.cz/turist-m/{z}-{x}-{y}"
       />
-      <Images dates={images} bounds={imageBounds} opacity={0.8} zIndex={10} />
+      <Images dates={images} bounds={imageBounds} />
     </MapContainer>
 )
 }
