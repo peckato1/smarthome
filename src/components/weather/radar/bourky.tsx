@@ -10,6 +10,7 @@ const imageBounds: L.LatLngBoundsLiteral = [[51.889, 20.223], [47.09, 10.06]]
 // const imageBoundsCzSk: L.LatLngBoundsLiteral  = [[51.879, 24.038], [45.917, 10.063]]
 
 const ANIMATION_MS = 500
+const REFRESH_IMAGES_MS = 30 * 1000
 
 function constructDates(n: number): dayjs.Dayjs[] {
   const now = dayjs()
@@ -60,16 +61,27 @@ function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLit
   )
 }
 
+const compareImageObjectArray = (a: ImageObject[], b: ImageObject[]) => {
+  return a.length === b.length && a.every((e, index) => e.date.isSame(b[index].date))
+}
+
 export default function WeatherRadar({ lat, lon } : { lat: number, lon: number }) {
-  const [images, setImages] = useState<{link: string, date: dayjs.Dayjs}[]>([])
+  const [images, setImages] = useState<ImageObject[]>([])
 
   useEffect(() => {
-    const dates = constructDates(10)
-    const imagesObjects = dates.map(date => { return {
-      link: `https://radar.bourky.cz/data/pacz2gmaps.z_max3d.${date.utc().format('YYYYMMDD.HHmm')}.0.png`,
-      date: date,
-    }})
-    setImages(() => imagesObjects)
+    const fetchImages = () => {
+      const dates = constructDates(10)
+      const imageObjects = dates.map(date => { return {
+        link: `https://radar.bourky.cz/data/pacz2gmaps.z_max3d.${date.utc().format('YYYYMMDD.HHmm')}.0.png`,
+        date: date,
+      }})
+
+      setImages((prevState: ImageObject[]) => compareImageObjectArray(prevState, imageObjects) ? prevState : imageObjects)
+    }
+
+    const timer = setInterval(fetchImages, REFRESH_IMAGES_MS)
+    fetchImages()
+    return () => clearInterval(timer)
   }, [])
 
   return (
