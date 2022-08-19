@@ -167,7 +167,7 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
                 <span className="fw-bold">{props.pidStopId}</span>
                 <div className="btn-group" role="group" aria-label="Filters">
                   { props.filters.map((filter, index) => (
-                      <FilterIcon key={index} icon={filter.icon} active={activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
+                      <FilterIcon key={index} icon={filter.icon} active={activeFilters.length === 0 || activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
                   ))}
                   { props.filters.length > 0 && (
                     <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => setActiveFilters(() => [])}></button>
