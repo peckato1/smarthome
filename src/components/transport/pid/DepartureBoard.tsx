@@ -121,7 +121,8 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
 	return () => {
       clearInterval(interval);
 	};
-  }, [props, fetchData]);
+  // eslint-disable-next-line
+  }, []);
 
   return (
     <div className="p-1 bg-light border rounded-3">
