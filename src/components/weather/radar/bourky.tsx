@@ -54,7 +54,13 @@ function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLit
     />
     <div className="position-relative">
       <div className="position-absolute top-20 end-0" style={{zIndex: 1000}}>
-        <span className="fw-bold h1">{images[n].date.format('HH:mm')}</span>
+        <ul className="list-group">
+          { images.map((e, index) => (
+            <li key={index} className={"list-group-item p-0 px-1" + (n === index ? " list-group-item-success" : "" )}>
+              <span className="fw-bold">{e.date.format('HH:mm')}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
     </React.Fragment>
