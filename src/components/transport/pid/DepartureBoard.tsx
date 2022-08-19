@@ -2,15 +2,11 @@ import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 
 import * as model from './model'
-import RouteBadge from './RouteBadge'
+import { RouteBadge, FilterBadge } from './Badges'
 import { useGolemioApiContext } from 'hooks/GolemioApiContext'
 
 const REFRESH_INTERVAL_MS = 10 * 1000
 
-interface PIDDepartureBoardProps {
-    pidStopId: string
-    count: number
-}
 const pad2 = (n: number) => { return (n < 10 ? '0' : '') + n }
 const delayed = (d: model.Departure) => {
   if (d.delay.is_available && d.delay.seconds && parseInt(d.delay.seconds!) > 0) {
@@ -96,15 +92,34 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
   )
 }
 
+interface Filter {
+  icon: React.ReactElement
+  func: (d: model.Departure) => boolean
+  active?: boolean
+}
+
+function FilterIcon({ icon, active, onClick }: { icon: React.ReactElement, active: boolean, onClick: any}) {
+  const styles = active ? undefined : { opacity: "0.5" }
+
+  // eslint-disable-next-line
+  return ( <a role="button" className="p-0 ps-1" style={styles} onClick={onClick}> {icon} </a> )
+}
+
+interface PIDDepartureBoardProps {
+  pidStopId: string
+  count: number
+  filters: Filter[]
+}
 function PIDDepartureBoard(props: PIDDepartureBoardProps) {
   const [ time, setTime ] = useState<number>();
   const [ data, setData ] = useState<any>(undefined);
   const [ error, setError ] = useState<Error|undefined>(undefined);
   const { fetchData } = useGolemioApiContext()
+  const [ activeFilters, setActiveFilters] = useState<number[]>(props.filters.filter(f => f.active === true).map((f, i) => i))
 
   useEffect(() => {
     const getData = () => {
-      fetchData('departureboards', { params: { names: props.pidStopId }})
+      fetchData('departureboards', { params: { names: props.pidStopId, limit: 40 }})
         .then((resp) => {
           setTime(() => Date.now())
           setData(() => resp.data)
@@ -125,13 +140,41 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
   // eslint-disable-next-line
   }, []);
 
+
+  const filterDepartures = (departures: model.Departure[]) => {
+    if (activeFilters.length === 0) {
+      return departures
+    }
+    return departures.filter(dept => activeFilters.some(filterIndex => props.filters[filterIndex].func(dept)))
+  }
+
+  const toggleActiveFilter = (filterIndex: number) => {
+    setActiveFilters((prevState: number[]) => {
+      if (!prevState.includes(filterIndex)) {
+        return [...prevState, filterIndex]
+      } else {
+        return prevState.filter((e) => e !== filterIndex)
+      }
+    })
+  }
+
   return (
       <React.Fragment>
         <thead key={props.pidStopId}>
           <tr className="table-primary">
             <td colSpan={4}>
-              {props.pidStopId}
-              <span className="float-end text-muted"><small>{dayjs(time).format('HH:mm:ss')}</small></span>
+              <div className="d-flex flex-row justify-content-between">
+                <span className="fw-bold">{props.pidStopId}</span>
+                <div className="btn-group" role="group" aria-label="Filters">
+                  { props.filters.map((filter, index) => (
+                      <FilterIcon key={index} icon={filter.icon} active={activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
+                  ))}
+                  { props.filters.length > 0 && (
+                    <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => setActiveFilters(() => [])}></button>
+                  )}
+                </div>
+                <span className="text-muted"><small>{dayjs(time).format('HH:mm:ss')}</small></span>
+              </div>
             </td>
           </tr>
         </thead>
@@ -151,24 +194,34 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
               <Infotexts data={ data ? ((data as any).infotexts as model.Infotext[]) : undefined } />
             </td>
           </tr>
-          <Departures departures={ data ? ((data as any).departures as model.Departure[]).slice(0, props.count) : undefined } />
+          <Departures departures={data ? filterDepartures((data as any).departures as model.Departure[]).slice(0, props.count) : undefined} />
         </tbody>
       </React.Fragment>
   )
 }
 
+const boards = [
+  { name: "Sídliště Červený Vrch", count: 6, filters: [
+    { icon: <FilterBadge type="tram"  direction="down" />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'A', active: true},
+    { icon: <FilterBadge type="tram"  direction="up"   />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'B'},
+  ]},
+  { name: "Bořislavka", count: 6, filters: [
+    { icon: <FilterBadge type="metro" direction="down" />, func: (d: model.Departure) => +d.route.type === 1 && d.stop.platform_code === '1', active: true},
+    { icon: <FilterBadge type="tram"  direction="down" />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'A', active: true},
+    { icon: <FilterBadge type="bus"                    />, func: (d: model.Departure) => +d.route.type === 3},
+    { icon: <FilterBadge type="metro" direction="up"   />, func: (d: model.Departure) => +d.route.type === 1 && d.stop.platform_code === '2'},
+    { icon: <FilterBadge type="tram"  direction="up"   />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'B'},
+  ]},
+  { name: "Pučálka", count: 7, filters: [] },
+  { name: "Nádraží Veleslavín", count: 7, filters: [] },
+]
+
 export default function DepartureBoard() {
-  const boards = [
-    { name: "Sídliště Červený Vrch", count: 6 },
-    { name: "Bořislavka", count: 6 },
-    { name: "Pučálka", count: 7 },
-    { name: "Nádraží Veleslavín", count: 7 },
-  ]
 
   return (
     <table className="table table-sm table-striped table-bordered">
       {boards.map(e => (
-        <PIDDepartureBoard key={e.name} pidStopId={e.name} count={e.count} />
+        <PIDDepartureBoard key={e.name} pidStopId={e.name} count={e.count} filters={e.filters} />
       ))}
     </table>
   )
