@@ -26,7 +26,7 @@ function GolemioApiContextProvider({ children, apiKey, params = {}}: { children:
         'x-access-token': apiKey,
         'Content-Type': 'application/json; charset=utf-8'
       },
-      params: { ...params, appid: apiKey, ...opts.params },
+      params: { ...params, ...opts.params },
     })
   }
 
