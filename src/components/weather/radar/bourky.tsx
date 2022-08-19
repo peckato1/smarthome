@@ -13,7 +13,7 @@ dayjs.extend(utc)
 const imageBounds: L.LatLngBoundsLiteral = [[51.889, 20.223], [47.09, 10.06]]
 // const imageBoundsCzSk: L.LatLngBoundsLiteral  = [[51.879, 24.038], [45.917, 10.063]]
 
-const ANIMATION_MS = 500
+const ANIMATION_MS = 350
 const REFRESH_IMAGES_MS = 30 * 1000
 
 function constructDates(n: number): dayjs.Dayjs[] {
