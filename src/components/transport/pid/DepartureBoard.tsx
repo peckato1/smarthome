@@ -72,7 +72,7 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
     return <React.Fragment />
 
   return (
-    <table className="table table-sm table-striped table-bordered">
+    <table className="table table-sm table-striped table-bordered mb-0">
       <tbody>
         {departures.map(d => (
           <tr key={d.stop.id + "/" + d.trip.id}>
