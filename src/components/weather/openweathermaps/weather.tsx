@@ -140,7 +140,7 @@ function ForecastRow({ data }: { data: any }) {
         <div className="row">
           <div className="col-sm-3 gs-1"><WeatherDetail data={data.weather} /></div>
           <div className="col-sm-5 gs-1"><TemperatureDetail data={data.main} /></div>
-          <div className="col-sm-4 gs-1"><PrecipDetail rain={data.rain} snow={data.snow} /></div>
+          <div className="col-sm-4 gs-1"><PrecipDetail pop={data.pop} rain={data.rain} snow={data.snow} /></div>
         </div>
         <div className="row">
           <div className="col-sm-3 gs-1"><PressureDetail data={data.main} /> </div>
@@ -160,7 +160,7 @@ function ForecastRowCompact({ data }: { data: any }) {
       <div className="col-sm-1"><WeatherDetail data={data.weather} compact /></div>
       <div className="col-sm-3"><TemperatureDetail data={data.main} short /></div>
       <div className="col-sm-4"><WindDetail data={data.wind} /></div>
-      <div className="col-sm-3"><PrecipDetail rain={data.rain} snow={data.snow} /></div>
+      <div className="col-sm-3"><PrecipDetail pop={data.pop} rain={data.rain} snow={data.snow} /></div>
     </div>
   )
 }
