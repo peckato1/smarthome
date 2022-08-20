@@ -112,7 +112,7 @@ function EventDisplay({ event, compact }: { event: Event, compact: boolean }) {
   }
 
   return (
-    <li className={"list-group-item " + itemClass}>
+    <li className={"list-group-item p-1 " + itemClass}>
       <div className="ms-2 me-auto">
        <div className="d-flex w-100 justify-content-between">
           <h3 className="h6">
