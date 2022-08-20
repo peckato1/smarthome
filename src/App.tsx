@@ -11,10 +11,9 @@ import { Auth as GoogleAuth } from 'utils/googleApi'
 import OpenWeatherApiContextProvider from 'hooks/OpenWeatherApiContext'
 import GolemioApiContextProvider from 'hooks/GolemioApiContext'
 
-import { todayEvent } from 'utils/time'
-
 import CurrentDateTime from "components/CurrentDateTime";
-import Calendar from 'components/calendar/calendar';
+import Calendar, { CalendarCompact} from 'components/calendar/calendar';
+import { CreateFilterEventStartsWithin } from 'components/calendar/eventFilters'
 import DepartureBoard from 'components/transport/pid/DepartureBoard';
 import Weather, { CurrentWeatherCompact, WeatherForecastCompact } from 'components/weather/openweathermaps/weather';
 import WeatherRadar from 'components/weather/radar/bourky';
@@ -59,7 +58,7 @@ function Footer({ authElement }: { authElement: React.ReactNode }) {
   )
 }
 
-const calendars = process.env.REACT_APP_GOOGLE_CALENDARS ? JSON.parse(process.env.REACT_APP_GOOGLE_CALENDARS) : []
+const ignoredCalendars = process.env.REACT_APP_IGNORE_GOOGLE_CALENDARS ? JSON.parse(process.env.REACT_APP_IGNORE_GOOGLE_CALENDARS) : []
 
 function Dashboard() {
   return (
@@ -67,7 +66,7 @@ function Dashboard() {
       <CurrentWeatherCompact lat={50.0988144} lon={14.3607961} />
       <WeatherForecastCompact lat={50.0988144} lon={14.3607961} />
       <div className="mb-2" />
-      <Calendar calendars={[calendars[0]]} n={3} datefilter={todayEvent} />
+      <CalendarCompact filter={CreateFilterEventStartsWithin(1, 'day')} ignoredCalendars={ignoredCalendars} nIfFilteredEmpty={3} />
     </React.Fragment>
   )
 }
@@ -82,7 +81,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/smarthome/" element={<Dashboard />} />
-            <Route path="/smarthome/calendar" element={<Calendar calendars={calendars} n={10} />} />
+            <Route path="/smarthome/calendar" element={<Calendar n={10} ignoredCalendars={ignoredCalendars} />} />
             <Route path="/smarthome/transport" element={<DepartureBoard />} />
             <Route path="/smarthome/weather" element={<Weather lat={50.0988144} lon={14.3607961} />} />
             <Route path="/smarthome/radar" element={<WeatherRadar lat={50.0988144} lon={14.3607961} />} />
