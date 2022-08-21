@@ -259,14 +259,16 @@ export function CurrentWeather(props: LatLon) {
             <div className="col-sm-4 gs-1"><PrecipDetail pop={data.pop} rain={data.rain} snow={data.snow} /></div>
             <div className="col-sm-3 gs-1">
               <span className="me-1"> <CloudDetail data={data.clouds} /></span>
-              <span className="me-1"> <VisibilityDetail visibility={data.visibility} /></span>
               <HumidityDetail data={data.main} />
             </div>
           </div>
           <div className="row">
             <div className="col-sm-5 gs-1"><WeatherDetail data={data.weather} /></div>
             <div className="col-sm-4 gs-1"><WindDetail data={data.wind} /></div>
-            <div className="col-sm-3 gs-1"><PressureDetail data={data.main} /> </div>
+            <div className="col-sm-3 gs-1">
+              <span className="me-1"> <PressureDetail data={data.main} /></span>
+              <VisibilityDetail visibility={data.visibility} />
+            </div>
           </div>
         </div>
     )}
