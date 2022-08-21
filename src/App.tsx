@@ -23,7 +23,7 @@ const segments = [
   { path: "/smarthome/calendar",  name: "Calendar",  icon: ( <FontAwesomeIcon icon={solid("calendar")} /> ) },
   { path: "/smarthome/transport", name: "Transport", icon: ( <FontAwesomeIcon icon={solid("bus-simple")} /> ) },
   { path: "/smarthome/weather",   name: "Weather",   icon: ( <FontAwesomeIcon icon={solid("cloud-sun-rain")} /> ) },
-  { path: "/smarthome/radar",     name: "Radar",     icon: ( <FontAwesomeIcon icon={solid("cloud-rain")} /> ) },
+  { path: "/smarthome/radar",     name: "Radar",     icon: ( <FontAwesomeIcon icon={solid("satellite-dish")} /> ) },
 ];
 
 function AppReloadButton() {
