@@ -141,15 +141,17 @@ function ForecastRow({ data }: { data: any }) {
       </div>
       <div className="container-fluid">
         <div className="row">
-          <div className="col-sm-3 gs-1"><WeatherDetail data={data.weather} /></div>
           <div className="col-sm-5 gs-1"><TemperatureDetail data={data.main} /></div>
           <div className="col-sm-4 gs-1"><PrecipDetail pop={data.pop} rain={data.rain} snow={data.snow} /></div>
+          <div className="col-sm-3 gs-1">
+            <span className="me-1"> <CloudDetail data={data.clouds} /></span>
+            <HumidityDetail data={data.main} />
+          </div>
         </div>
         <div className="row">
-          <div className="col-sm-3 gs-1"><PressureDetail data={data.main} /> </div>
-          <div className="col-sm-2 gs-1"><CloudDetail data={data.clouds} /> </div>
-          <div className="col-sm-2 gs-1"><HumidityDetail data={data.main} /> </div>
+          <div className="col-sm-5 gs-1"><WeatherDetail data={data.weather} /></div>
           <div className="col-sm-4 gs-1"><WindDetail data={data.wind} /></div>
+          <div className="col-sm-3 gs-1"><PressureDetail data={data.main} /> </div>
         </div>
       </div>
     </div>
@@ -162,8 +164,8 @@ function ForecastRowCompact({ data }: { data: any }) {
       <div className="col-sm-1"><span className="fw-bold">{dayjs.unix(data.dt).format('H:mm')}</span></div>
       <div className="col-sm-1"><WeatherDetail data={data.weather} compact /></div>
       <div className="col-sm-3"><TemperatureDetail data={data.main} short /></div>
-      <div className="col-sm-4"><WindDetail data={data.wind} /></div>
       <div className="col-sm-3"><PrecipDetail pop={data.pop} rain={data.rain} snow={data.snow} /></div>
+      <div className="col-sm-4"><WindDetail data={data.wind} /></div>
     </div>
   )
 }
@@ -228,8 +230,8 @@ export function CurrentWeatherCompact(props: LatLon) {
           <span className="h4 mb-0 me-3">{data.name}</span>
           <div className="me-3"><WeatherDetail data={data.weather} /> </div>
           <div className="me-3"><TemperatureDetail data={data.main} short /> </div>
+          { data.pop && ( <div className="me-3"><PrecipDetail rain={data.rain} snow={data.snow} pop={data.pop} /> </div> )}
           <div className="me-3"><WindDetail data={data.wind} /> </div>
-          <div className="me-3"><PrecipDetail rain={data.rain} snow={data.snow} /> </div>
         </div>
       )}
     </div>
@@ -246,21 +248,25 @@ export function CurrentWeather(props: LatLon) {
       { data && (
         <div>
           <h4>
-            {data.name} <small className="text-muted float-end">@ { dayjs.unix(data.dt).format('HH:mm:ss')}</small>
+            {data.name}
+            <small className="text-muted float-end">
+              <SunriseDetail sunrise={dayjs.unix(data.sys.sunrise)} sunset={dayjs.unix(data.sys.sunset)} />
+            </small>
           </h4>
 
-          <div className="d-flex flex-row flex-wrap justify-content-around">
-            <div className="me-3"><WeatherDetail data={data.weather} /> </div>
-            <div className="me-3"><TemperatureDetail data={data.main} /> </div>
-            <div className="me-3"><WindDetail data={data.wind} /> </div>
-            <div className="me-3"><PrecipDetail rain={data.rain} snow={data.snow} pop={data.pop} /> </div>
+          <div className="row">
+            <div className="col-sm-5 gs-1"><TemperatureDetail data={data.main} /></div>
+            <div className="col-sm-4 gs-1"><PrecipDetail pop={data.pop} rain={data.rain} snow={data.snow} /></div>
+            <div className="col-sm-3 gs-1">
+              <span className="me-1"> <CloudDetail data={data.clouds} /></span>
+              <span className="me-1"> <VisibilityDetail visibility={data.visibility} /></span>
+              <HumidityDetail data={data.main} />
+            </div>
           </div>
-          <div className="d-flex flex-row flex-wrap justify-content-around">
-            <div className="me-3"><PressureDetail data={data.main} /> </div>
-            <div className="me-3"><HumidityDetail data={data.main} /> </div>
-            <div className="me-3"><CloudDetail data={data.clouds} /> </div>
-            <div className="me-3"><VisibilityDetail visibility={data.visibility} /> </div>
-            <div className="me-3"><SunriseDetail sunrise={dayjs.unix(data.sys.sunrise)} sunset={dayjs.unix(data.sys.sunset)} /> </div>
+          <div className="row">
+            <div className="col-sm-5 gs-1"><WeatherDetail data={data.weather} /></div>
+            <div className="col-sm-4 gs-1"><WindDetail data={data.wind} /></div>
+            <div className="col-sm-3 gs-1"><PressureDetail data={data.main} /> </div>
           </div>
         </div>
     )}
