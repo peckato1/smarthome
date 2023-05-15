@@ -212,7 +212,6 @@ const boards = [
     { icon: <FilterBadge type="metro" direction="up"   />, func: (d: model.Departure) => +d.route.type === 1 && d.stop.platform_code === '2'},
     { icon: <FilterBadge type="tram"  direction="up"   />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'B'},
   ]},
-  { name: "Pučálka", count: 7, filters: [] },
   { name: "Nádraží Veleslavín", count: 7, filters: [] },
 ]
 
