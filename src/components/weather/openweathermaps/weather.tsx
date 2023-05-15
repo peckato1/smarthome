@@ -95,7 +95,7 @@ function PrecipDetail({ pop, snow, rain }: { pop?: number, snow: { [key: string]
   return (
     <React.Fragment>
       <WeatherIcon icon="wi-umbrella" />
-        &nbsp;{pop ? pop * 100 : 0}%
+        &nbsp;{pop ? Math.round(pop * 100) : 0}%
       {rain && (
         <React.Fragment>
           &nbsp;<WeatherIcon icon="wi-showers" /> { rain['3h'] } mm
