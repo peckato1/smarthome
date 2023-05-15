@@ -8,8 +8,8 @@ import { useGolemioApiContext } from 'hooks/GolemioApiContext'
 const REFRESH_INTERVAL_MS = 10 * 1000
 
 interface PIDDepartureBoardProps {
-	pidStopId: string
-	count: number
+    pidStopId: string
+    count: number
 }
 const pad2 = (n: number) => { return (n < 10 ? '0' : '') + n }
 const delayed = (d: model.Departure) => {
@@ -72,26 +72,27 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
     return <React.Fragment />
 
   return (
-    <table className="table table-sm table-striped table-bordered mb-0">
-      <tbody>
-        {departures.map(d => (
-          <tr key={d.stop.id + "/" + d.trip.id}>
-            <td className="font-monospace p-0">
-              <div className="d-inline-flex flex-row">
-                {dayjs(d.departure_timestamp.scheduled).format('HH:mm')}
-                {delayed(d) && (<span className="ms-1 badge text-bg-warning">+&nbsp;{delayed(d)}</span>)}
-              </div>
-            </td>
-            <td className="p-0">
-              <div className="d-inline-flex flex-row">
-                <RouteBadge type={d.route.type} name={d.route.short_name} />
-                <div className="fw-bold ms-2">{d.trip.headsign}</div>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <React.Fragment>
+      {departures.map(d => (
+        <tr key={d.stop.id + "/" + d.trip.id}>
+          <td className="font-monospace p-0 ps-1">
+              {dayjs(d.departure_timestamp.scheduled).format('HH:mm')}
+          </td>
+          <td className="font-monospace p-0 ps-1">
+              {delayed(d) && (<span className="ms-1 badge text-bg-warning">+&nbsp;{delayed(d)}</span>)}
+          </td>
+          <td className="p-0 ps-1">
+            <small className="">{dayjs(d.departure_timestamp.predicted).fromNow()}</small>
+          </td>
+          <td className="p-0 ps-1">
+            <div className="d-inline-flex flex-row">
+              <RouteBadge type={d.route.type} name={d.route.short_name} />
+              <div className="fw-bold ms-2">{d.trip.headsign}</div>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </React.Fragment>
   )
 }
 
@@ -116,45 +117,60 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
           console.log(error)
         })
       }
-	const interval = setInterval(getData, REFRESH_INTERVAL_MS)
-	getData()
-	return () => {
+    const interval = setInterval(getData, REFRESH_INTERVAL_MS)
+    getData()
+    return () => {
       clearInterval(interval);
-	};
+    }
   // eslint-disable-next-line
   }, []);
 
   return (
-    <div className="p-1 bg-light border rounded-3">
-      <h4 className="mb-1">{props.pidStopId}</h4>
-      <Error error={ error } />
-      <Loading visible={ data === undefined } />
-      <Infotexts data={ data ? ((data as any).infotexts as model.Infotext[]) : undefined } />
-      <Departures departures={ data ? ((data as any).departures as model.Departure[]).slice(0, props.count) : undefined } />
-
-      { time && ( <span><small>Last updated on { dayjs(time).format('HH:mm:ss') }</small></span> ) }
-    </div>
+      <React.Fragment>
+        <thead key={props.pidStopId}>
+          <tr className="table-primary">
+            <td colSpan={4}>
+              {props.pidStopId}
+              <span className="float-end text-muted"><small>{dayjs(time).format('HH:mm:ss')}</small></span>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className={error ? "" : "visually-hidden"}>
+            <td colSpan={4}>
+              <Error error={ error } />
+            </td>
+          </tr>
+          <tr className={!data ? "" : "visually-hidden"}>
+            <td colSpan={4}>
+              <Loading visible={ data === undefined } />
+            </td>
+          </tr>
+          <tr className={data && (data as any).infotexts.length > 0 ? "" : "visually-hidden"}>
+            <td colSpan={4}>
+              <Infotexts data={ data ? ((data as any).infotexts as model.Infotext[]) : undefined } />
+            </td>
+          </tr>
+          <Departures departures={ data ? ((data as any).departures as model.Departure[]).slice(0, props.count) : undefined } />
+        </tbody>
+      </React.Fragment>
   )
 }
 
 export default function DepartureBoard() {
   const boards = [
-    { name: "Sídliště Červený Vrch", count: 7 },
-    { name: "Bořislavka", count: 7 },
+    { name: "Sídliště Červený Vrch", count: 6 },
+    { name: "Bořislavka", count: 6 },
     { name: "Pučálka", count: 7 },
-    { name: "Kosmonosy,nemocnice", count: 7 },
-    { name: "Černý Most", count: 27 },
-    { name: "Mladá Boleslav,aut.st.", count: 27 },
+    { name: "Nádraží Veleslavín", count: 7 },
   ]
 
   return (
-    <div className="row align-items-md-stretch">
+    <table className="table table-sm table-striped table-bordered">
       {boards.map(e => (
-        <div className="col-sm-6 col-lg-6 col-xl-4 p-1" key={e.name}>
-          <PIDDepartureBoard pidStopId={e.name} count={e.count} />
-        </div>
+        <PIDDepartureBoard key={e.name} pidStopId={e.name} count={e.count} />
       ))}
-    </div>
+    </table>
   )
 
 }
