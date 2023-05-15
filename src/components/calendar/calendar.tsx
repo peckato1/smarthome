@@ -108,7 +108,7 @@ function EventDisplay({ event, compact }: { event: Event, compact: boolean }) {
         </div>
         {compact !== true && (
           <React.Fragment>
-            {event.description && (
+            {event.description && event.description.trim().length > 0 && (
               <p className="mb-0">
                 <FontAwesomeIcon icon={solid("comment")} /> <span dangerouslySetInnerHTML={{ __html: event.description}} />
               </p>
