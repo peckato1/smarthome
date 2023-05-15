@@ -4,6 +4,8 @@ import dayjs from 'dayjs'
 import * as model from './model'
 import { RouteBadge, FilterBadge } from './Badges'
 import { useGolemioApiContext } from 'hooks/GolemioApiContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 
 const REFRESH_INTERVAL_MS = 10 * 1000
 
@@ -81,9 +83,11 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
             <small className="">{dayjs(d.departure_timestamp.predicted).fromNow()}</small>
           </td>
           <td className="p-0 ps-1">
-            <div className="d-inline-flex flex-row">
+            <div className="d-flex flex-row">
               <RouteBadge type={d.route.type} name={d.route.short_name} />
-              <div className="fw-bold ms-2">{d.trip.headsign}</div>
+              <span className="fw-bold ms-2 flex-grow-1">{d.trip.headsign}</span>
+              {d.trip.is_air_conditioned       && ( <div><FontAwesomeIcon className="mx-1" icon={solid("snowflake")} /></div> )}
+              {d.trip.is_wheelchair_accessible && ( <div><FontAwesomeIcon className="mx-1" icon={solid("wheelchair")} /></div> )}
             </div>
           </td>
         </tr>
