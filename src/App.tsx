@@ -19,11 +19,11 @@ import Weather, { CurrentWeatherCompact, WeatherForecastCompact } from 'componen
 import WeatherRadar from 'components/weather/radar/bourky';
 
 const segments = [
-  { path: "/smarthome/",          name: "/",         icon: ( <FontAwesomeIcon icon={solid("home")} /> ) },
-  { path: "/smarthome/calendar",  name: "Calendar",  icon: ( <FontAwesomeIcon icon={solid("calendar")} /> ) },
-  { path: "/smarthome/transport", name: "Transport", icon: ( <FontAwesomeIcon icon={solid("bus-simple")} /> ) },
-  { path: "/smarthome/weather",   name: "Weather",   icon: ( <FontAwesomeIcon icon={solid("cloud-sun-rain")} /> ) },
-  { path: "/smarthome/radar",     name: "Radar",     icon: ( <FontAwesomeIcon icon={solid("satellite-dish")} /> ) },
+  { path: "/smarthome/",              name: "/",         icon: ( <FontAwesomeIcon icon={solid("home")} /> ) },
+  { path: "/smarthome/calendar",      name: "Calendar",  icon: ( <FontAwesomeIcon icon={solid("calendar")} /> ) },
+  { path: "/smarthome/transport",     name: "Transport", icon: ( <FontAwesomeIcon icon={solid("bus-simple")} /> ) },
+  { path: "/smarthome/weather",       name: "Weather",   icon: ( <FontAwesomeIcon icon={solid("cloud-sun-rain")} /> ) },
+  { path: "/smarthome/weather/radar", name: "Radar",     icon: ( <FontAwesomeIcon icon={solid("satellite-dish")} /> ) },
 ];
 
 function AppReloadButton() {
@@ -84,7 +84,7 @@ function App() {
             <Route path="/smarthome/calendar" element={<Calendar n={10} ignoredCalendars={ignoredCalendars} />} />
             <Route path="/smarthome/transport" element={<DepartureBoard />} />
             <Route path="/smarthome/weather" element={<Weather lat={50.0988144} lon={14.3607961} />} />
-            <Route path="/smarthome/radar" element={<WeatherRadar lat={50.0988144} lon={14.3607961} />} />
+            <Route path="/smarthome/weather/radar" element={<WeatherRadar lat={50.0988144} lon={14.3607961} />} />
 
             <Route path="*" element={<p>404</p>} />
           </Routes>
