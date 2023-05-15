@@ -33,7 +33,7 @@ export interface Route {
 
 export interface Stop {
     id: string
-    platform_info: string
+    platform_code: string
 }
 
 export interface Trip {
