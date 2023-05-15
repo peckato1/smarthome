@@ -5,7 +5,7 @@ import * as model from './model'
 import RouteBadge from './RouteBadge'
 import { useGolemioApiContext } from 'hooks/GolemioApiContext'
 
-const REFRESH_INTERVAL_MS = 5000
+const REFRESH_INTERVAL_MS = 10 * 1000
 
 interface PIDDepartureBoardProps {
 	pidStopId: string
