@@ -28,33 +28,29 @@ function constructDates(n: number): dayjs.Dayjs[] {
    }, [firstDate])
 }
 
-interface ImageObject {
-  link: string
-  date: dayjs.Dayjs
-}
-
-function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLiteral, opacity: number, zIndex: number, images: ImageObject[] }) {
+function Images({ bounds, opacity, zIndex, dates }: { bounds: L.LatLngBoundsLiteral, opacity: number, zIndex: number, dates: dayjs.Dayjs[] }) {
   const [n, setN] = useState<number>(0)
   const [animate, setAnimate] = useState<boolean>(true)
 
   useEffect(() => {
     const nextImage = () => {
       if (animate) {
-	    setN(() => (n + 1) % images.length)
+	    setN(() => (n + 1) % dates.length)
 	  }
     }
-    const timer = setInterval(nextImage, ANIMATION_MS * (n === images.length - 1 ? 3 : 1))
+    const timer = setInterval(nextImage, ANIMATION_MS * (n === dates.length - 1 ? 3 : 1))
     return () => clearInterval(timer)
-  }, [images, n, animate])
+  }, [dates, n, animate])
 
-  if (images.length === 0) {
+  if (dates.length === 0) {
     return null
   }
+
 
   return (
     <React.Fragment>
     <ImageOverlay
-      url={images[n].link}
+      url={`https://radar.bourky.cz/data/pacz2gmaps.z_max3d.${dates[n].utc().format('YYYYMMDD.HHmm')}.0.png`}
       bounds={bounds}
       opacity={opacity}
       zIndex={zIndex}
@@ -62,9 +58,9 @@ function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLit
     <div className="position-relative">
       <div className="position-absolute top-20 end-0" style={{zIndex: 1000}}>
         <ul className="list-group">
-          { images.map((e, index) => (
+          { dates.map((e, index) => (
             <button key={index} className={"list-group-item list-group-item-action p-0 px-1 pb-1" + (n === index ? " list-group-item-success" : "" )} onClick={() => { setN(() => index); setAnimate(() => false) }}>
-              <span className="fw-bold">{e.date.format('HH:mm')}</span>
+              <span className="fw-bold">{e.format('HH:mm')}</span>
             </button>
           ))}
           <button className="list-group-item list-group-item-action p-0 px-1 pb-1 text-center" onClick={() => setAnimate((prevState: boolean) => !prevState)}>
@@ -77,22 +73,17 @@ function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLit
   )
 }
 
-const compareImageObjectArray = (a: ImageObject[], b: ImageObject[]) => {
-  return a.length === b.length && a.every((e, index) => e.date.isSame(b[index].date))
+const compareDateArray = (a: dayjs.Dayjs[], b: dayjs.Dayjs[]) => {
+  return a.length === b.length && a.every((e, index) => e.isSame(b[index]))
 }
 
 export default function WeatherRadar({ lat, lon } : { lat: number, lon: number }) {
-  const [images, setImages] = useState<ImageObject[]>([])
+  const [images, setImages] = useState<dayjs.Dayjs[]>([])
 
   useEffect(() => {
     const fetchImages = () => {
       const dates = constructDates(10)
-      const imageObjects = dates.map(date => { return {
-        link: `https://radar.bourky.cz/data/pacz2gmaps.z_max3d.${date.utc().format('YYYYMMDD.HHmm')}.0.png`,
-        date: date,
-      }})
-
-      setImages((prevState: ImageObject[]) => compareImageObjectArray(prevState, imageObjects) ? prevState : imageObjects)
+      setImages((prevState: dayjs.Dayjs[]) => compareDateArray(prevState, dates) ? prevState : dates)
     }
 
     const timer = setInterval(fetchImages, REFRESH_IMAGES_MS)
@@ -106,7 +97,7 @@ export default function WeatherRadar({ lat, lon } : { lat: number, lon: number }
         attribution='&copy; <a href="http://www.mapy.cz">mapy.cz</a> by <a href="http://www.seznam.cz">Seznam.cz</a>, a.s.'
         url="http://mapserver.mapy.cz/turist-m/{z}-{x}-{y}"
       />
-      <Images images={images} bounds={imageBounds} opacity={0.8} zIndex={10} />
+      <Images dates={images} bounds={imageBounds} opacity={0.8} zIndex={10} />
     </MapContainer>
 )
 }
