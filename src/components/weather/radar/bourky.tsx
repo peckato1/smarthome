@@ -56,9 +56,9 @@ function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLit
       <div className="position-absolute top-20 end-0" style={{zIndex: 1000}}>
         <ul className="list-group">
           { images.map((e, index) => (
-            <li key={index} className={"list-group-item p-0 px-1" + (n === index ? " list-group-item-success" : "" )}>
+            <button key={index} className={"list-group-item list-group-item-action p-0 px-1 pb-1" + (n === index ? " list-group-item-success" : "" )} onClick={() => setN(() => index)}>
               <span className="fw-bold">{e.date.format('HH:mm')}</span>
-            </li>
+            </button>
           ))}
         </ul>
       </div>
