@@ -7,7 +7,8 @@ import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 import { formatRfc3339 as rfc3339 } from 'utils/time'
 import { useGoogleApiContext } from 'hooks/GoogleApiContext'
 
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000
+const REFRESH_CALENDARS_INTERVAL_MS = 5 * 60 * 1000
+const REFRESH_EVENTS_INTERVAL_MS = 5 * 60 * 1000
 
 interface EventTime {
   date?: string
@@ -15,7 +16,7 @@ interface EventTime {
   timeZone?: string
 }
 
-interface Event {
+export interface Event {
   id: string
   iCalUID: string
   kind: "calendar#event"
@@ -46,6 +47,26 @@ interface Event {
   sequence: number
 }
 
+interface EventWithCalendar extends Event {
+  calendarId: string
+}
+
+interface Calendar {
+  id: string
+
+  summary: string
+  summaryOverride?: string
+
+  backgroundColor?: string
+  foregroundColor?: string
+
+  etag: string
+  hidden?: boolean
+
+  primary?: boolean
+  deleted?: boolean
+  selected?: boolean
+}
 
 function calculateEventTime(start: EventTime, end: EventTime) {
   const isSameDay = (a: dayjs.Dayjs, b: dayjs.Dayjs) => a.format('YYYY-MM-DD') === b.format('YYYY-MM-DD')
@@ -73,13 +94,6 @@ function calculateEventTime(start: EventTime, end: EventTime) {
   }
 
   return { timeText: text, fromNow: dayjs(start.dateTime ? start.dateTime : start.date).fromNow() }
-/*
-  return (
-    <React.Fragment>
-      <span className="fw-bold text-primary">{text}</span> <span className="text-muted">({})</span>
-    </React.Fragment>
-  )
-*/
 }
 
 function EventDisplay({ event, compact }: { event: Event, compact: boolean }) {
@@ -127,90 +141,161 @@ function EventDisplay({ event, compact }: { event: Event, compact: boolean }) {
   )
 }
 
-function Calendar({ events, compact }: { events: Event[], compact: boolean }) {
+function EventList({ events, compact = false }: { events: EventWithCalendar[], compact?: boolean }) {
   return (
     <ul className="list-group">
-      {events.map((e: any) => (
-          <EventDisplay key={e.id} event={e} compact={compact} />
+      { events.map(e => (
+        <EventDisplay key={e.id} event={e} compact={compact} />
       ))}
     </ul>
   )
+
 }
 
+interface CalendarSpecification {
+  name?: string
+  id?: string
+}
 interface CalendarProps {
-  calendars: { id: string, name: string }[]
   n?: number
-  compact?: boolean
-  datefilter?: (eventStart: dayjs.Dayjs, eventEnd: dayjs.Dayjs) => boolean
+  nIfFilteredEmpty?: number
+  filter?: (event: EventWithCalendar) => boolean
+  ignoredCalendars?: CalendarSpecification[]
 }
 
-const dummyDateFilter = (eventStart: dayjs.Dayjs, eventEnd: dayjs.Dayjs) => true
-
-export default function CalendarWrapper({ calendars, n = 10, compact = false, datefilter = dummyDateFilter }: CalendarProps) {
-  const [events, setEvents] = useState<Event[]>([])
-  const [currentCal, setCurrentCal] = useState<number>(0)
+function useCalendarEvents({ filter, n, nIfFilteredEmpty, ignoredCalendars = [] }: CalendarProps) {
   const googleApi = useGoogleApiContext()
+  const [calendars, setCalendars] = useState<Calendar[]>([])
+  const [events, setEvents] = useState<{[key: string]: EventWithCalendar[]}>({})
+
+  useEffect(() => {
+  console.log(googleApi)
+    const getData = () => {
+      const { ready, fetchData } = googleApi
+      if (!ready)
+        return
+
+      fetchData(`https://www.googleapis.com/calendar/v3/users/me/calendarList`)
+        .then((resp) => {
+          const calendars = resp.data.items.filter((calendar: Calendar) => !ignoredCalendars.some(spec => (spec.id && spec.id === calendar.id) || (spec.name && spec.name === calendar.summary)))
+          setCalendars(() => calendars)
+        }).catch((error) => {
+          console.error(error)
+        })
+    }
+
+    const interval = setInterval(getData, REFRESH_CALENDARS_INTERVAL_MS)
+    getData()
+    return () => clearInterval(interval)
+  }, [ignoredCalendars, googleApi]);
 
   useEffect(() => {
     const getData = () => {
       const { ready, fetchData } = googleApi
-      if (!ready) {
+      if (!ready)
         return
-      }
 
       const today = dayjs().startOf('date')
+      const timeMin = rfc3339(today)
+      const timeMax = rfc3339(today.add(3, 'month'))
 
-      fetchData(`https://www.googleapis.com/calendar/v3/calendars/${calendars[currentCal].id}/events`, { params: {
-          singleEvents: 'True',
-          orderBy: 'startTime',
-          timeMin: rfc3339(today),
-          timeMax: rfc3339(today.add(3, 'month')),
-          maxResults: n,
-        }
-      }).then((resp) => {
-        setEvents(() => resp.data.items)
-      }).catch((error) => {
-        console.error(error)
+      calendars.forEach(calendar => {
+        fetchData(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events`, { params: {
+            singleEvents: 'True',
+            orderBy: 'startTime',
+            timeMin: timeMin,
+            timeMax: timeMax,
+            maxResults: 40,
+          }
+        }).then(resp => {
+          const extendedEvents = resp.data.items.map((event: Event): EventWithCalendar => {
+            return { ...event, calendarId: calendar.id }
+          })
+          setEvents((prevState: any) => {
+            let copy = { ...prevState }
+            copy[calendar.id] = extendedEvents
+            return copy
+          })
+        }).catch(error => {
+          console.error(error)
+        })
       })
     }
 
-    const interval = setInterval(getData, REFRESH_INTERVAL_MS)
+    const interval = setInterval(getData, REFRESH_EVENTS_INTERVAL_MS)
     getData()
+    return () => clearInterval(interval)
+  }, [calendars, googleApi]);
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [googleApi, currentCal, calendars, n]);
+  const flattenedEvents = calendars.reduce((prev: EventWithCalendar[], calendar: Calendar) => {
+    return (calendar.id in events) ? prev.concat(events[calendar.id]) : prev
+  }, [])
+  let filteredEvents = filter ? flattenedEvents.filter(filter) : flattenedEvents
+  if (filteredEvents.length === 0) {
+      filteredEvents = flattenedEvents.slice(0, nIfFilteredEmpty)
+  } else {
+      filteredEvents = filteredEvents.slice(0, n)
+  }
 
+  const displayedEvents = filteredEvents.sort((a: Event, b: Event) => {
+    const startA = a.start.date ?? a.start.dateTime
+    const startB = b.start.date ?? b.start.dateTime
+    return dayjs(startA).valueOf() - dayjs(startB).valueOf()
+  })
 
-  let selectedEvents = events.filter(event => datefilter(dayjs(event.start.dateTime ?? event.start.date), dayjs(event.end.dateTime ?? event.end.date)))
-  if (selectedEvents.length === 0) {
-      selectedEvents = events
+  return { calendars: calendars, events: displayedEvents }
+}
+
+export default function CalendarWrapper({ n, nIfFilteredEmpty, filter, ignoredCalendars }: CalendarProps) {
+  const [currentCalendars, setCurrentCalendars] = useState<Calendar[]>([])
+  const { calendars, events } = useCalendarEvents({
+    filter: event => currentCalendars.some(c => c.id === event.calendarId) && (filter ? filter(event) : true),
+    n: n,
+    nIfFilteredEmpty: nIfFilteredEmpty,
+    ignoredCalendars: ignoredCalendars,
+  })
+
+  const toggleCalendar = (calendar: Calendar) => {
+    setCurrentCalendars((prevState: Calendar[]) => {
+      if (!prevState.some(cc => cc.id === calendar.id)) {
+        return [...prevState, calendar]
+      } else {
+        return prevState.filter(cc => cc.id !== calendar.id)
+      }
+    })
   }
 
   return (
-    <div className="container-fluid">
+    <React.Fragment>
       {calendars.length > 1 && (
-        <div className="row mb-1 d-flex flex-row">
+        <div className="row mb-1 d-grid">
           <div className="btn-group" role="group">
-            {calendars.map((cal, id) => (
+            {calendars.filter(cal => cal.selected ?? false).map(cal => (
               <button
-                key={cal.id}
-                className={"btn btn-sm btn-primary " + (currentCal === id ? "active" : "")}
                 type="button"
-                onClick={() => setCurrentCal(() => id)}>
-                  {cal.name}
+                key={cal.id}
+                className={"btn btn-sm btn-primary" + (currentCalendars.some(cc => cc.id === cal.id) ? " active" : "")}
+                onClick={() => toggleCalendar(cal)}>
+                  {cal.summaryOverride ?? cal.summary}
               </button>
             ))}
           </div>
         </div>
       )}
-      <div className="row">
-        <Calendar
-          events={selectedEvents}
-          compact={compact}
-        />
-      </div>
-    </div>
+      <EventList events={events} />
+    </React.Fragment>
+  )
+}
+
+export function CalendarCompact({ n, nIfFilteredEmpty, filter, ignoredCalendars }: CalendarProps) {
+  const { events } = useCalendarEvents({
+    filter: filter,
+    n: n,
+    nIfFilteredEmpty: nIfFilteredEmpty,
+    ignoredCalendars: ignoredCalendars,
+  })
+
+  return (
+    <EventList events={events} compact />
   )
 }

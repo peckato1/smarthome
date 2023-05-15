@@ -23,7 +23,7 @@ interface TokenResponseWithUserInfo extends TokenResponse {
 export interface GoogleApiContext {
   ready: boolean
   tokens?: TokenResponseWithUserInfo
-  fetchData: (url: string, opts: FetchOptions) => Promise<any>
+  fetchData: (url: string, opts?: FetchOptions) => Promise<any>
   login: () => void
 }
 
@@ -36,7 +36,7 @@ interface FetchOptions {
   headers?: ObjMap<string>
 }
 
-const dummyFetchData = (url: string, opts: FetchOptions): Promise<any> => { return new Promise<any>(undefined as any) }
+const dummyFetchData = (url: string, opts: FetchOptions = {}): Promise<any> => { return new Promise<any>(undefined as any) }
 
 const Context = createContext({ready: false, fetchData: dummyFetchData, tokens: undefined} as GoogleApiContext)
 
@@ -59,7 +59,7 @@ function GoogleApiContextProvider({ children, scopes }: { children: React.ReactN
     scope: scopes.join(' ')
   })
 
-  const fetchData = async (url: string, opts: FetchOptions) => {
+  const fetchData = async (url: string, opts: FetchOptions = {}) => {
     if (tokenResponse.expiry_date <= +dayjs().add(5, 'second')) {
       const tokens = await axios.post(BACKEND_REFRESH_TOKEN, { refreshToken: tokenResponse.refresh_token })
       renewState(tokens.data)
