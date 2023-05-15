@@ -17,12 +17,14 @@ import CurrentDateTime from "components/CurrentDateTime";
 import Calendar from 'components/calendar/calendar';
 import DepartureBoard from 'components/transport/pid/DepartureBoard';
 import Weather, { CurrentWeatherCompact, WeatherForecastCompact } from 'components/weather/openweathermaps/weather';
+import WeatherRadar from 'components/weather/radar/bourky';
 
 const segments = [
-  { path: "/smarthome/",         name: "/",         icon: ( <FontAwesomeIcon icon={solid("home")} /> ) },
+  { path: "/smarthome/",          name: "/",         icon: ( <FontAwesomeIcon icon={solid("home")} /> ) },
   { path: "/smarthome/calendar",  name: "Calendar",  icon: ( <FontAwesomeIcon icon={solid("calendar")} /> ) },
   { path: "/smarthome/transport", name: "Transport", icon: ( <FontAwesomeIcon icon={solid("bus-simple")} /> ) },
   { path: "/smarthome/weather",   name: "Weather",   icon: ( <FontAwesomeIcon icon={solid("cloud-sun-rain")} /> ) },
+  { path: "/smarthome/radar",     name: "Radar",     icon: ( <FontAwesomeIcon icon={solid("cloud-rain")} /> ) },
 ];
 
 function AppReloadButton() {
@@ -83,6 +85,7 @@ function App() {
             <Route path="/smarthome/calendar" element={<Calendar calendars={calendars} n={10} />} />
             <Route path="/smarthome/transport" element={<DepartureBoard />} />
             <Route path="/smarthome/weather" element={<Weather lat={50.0988144} lon={14.3607961} />} />
+            <Route path="/smarthome/radar" element={<WeatherRadar lat={50.0988144} lon={14.3607961} />} />
 
             <Route path="*" element={<p>404</p>} />
           </Routes>
