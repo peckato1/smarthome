@@ -78,7 +78,7 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
           <tr key={d.stop.id + "/" + d.trip.id}>
             <td className="font-monospace p-0">
               <div className="d-inline-flex flex-row">
-                {dayjs(d.departure_timestamp.scheduled).format('H:mm')}
+                {dayjs(d.departure_timestamp.scheduled).format('HH:mm')}
                 {delayed(d) && (<span className="ms-1 badge text-bg-warning">+&nbsp;{delayed(d)}</span>)}
               </div>
             </td>
