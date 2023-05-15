@@ -92,6 +92,9 @@ function VisibilityDetail({ visibility }: { visibility: number }) {
 }
 
 function PrecipDetail({ pop, snow, rain }: { pop?: number, snow: { [key: string]: number }, rain: { [key: string]: number } }) {
+  if (pop === undefined || pop === 0) {
+    return null
+  }
   return (
     <React.Fragment>
       <WeatherIcon icon="wi-umbrella" />
@@ -250,7 +253,7 @@ export function CurrentWeather(props: LatLon) {
             <div className="me-3"><WeatherDetail data={data.weather} /> </div>
             <div className="me-3"><TemperatureDetail data={data.main} /> </div>
             <div className="me-3"><WindDetail data={data.wind} /> </div>
-            <div className="me-3"><PrecipDetail rain={data.rain} snow={data.snow} /> </div>
+            <div className="me-3"><PrecipDetail rain={data.rain} snow={data.snow} pop={data.pop} /> </div>
           </div>
           <div className="d-flex flex-row flex-wrap justify-content-around">
             <div className="me-3"><PressureDetail data={data.main} /> </div>
