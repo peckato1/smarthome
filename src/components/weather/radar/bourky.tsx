@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
+
 import { MapContainer, TileLayer, ImageOverlay } from 'react-leaflet'
 import L from 'leaflet'
 import dayjs from 'dayjs'
@@ -31,14 +35,17 @@ interface ImageObject {
 
 function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLiteral, opacity: number, zIndex: number, images: ImageObject[] }) {
   const [n, setN] = useState<number>(0)
+  const [animate, setAnimate] = useState<boolean>(true)
 
   useEffect(() => {
     const nextImage = () => {
-      setN(() => (n + 1) % images.length)
+      if (animate) {
+	    setN(() => (n + 1) % images.length)
+	  }
     }
     const timer = setInterval(nextImage, ANIMATION_MS * (n === images.length - 1 ? 3 : 1))
     return () => clearInterval(timer)
-  }, [images, n])
+  }, [images, n, animate])
 
   if (images.length === 0) {
     return null
@@ -56,10 +63,13 @@ function Images({ bounds, opacity, zIndex, images }: { bounds: L.LatLngBoundsLit
       <div className="position-absolute top-20 end-0" style={{zIndex: 1000}}>
         <ul className="list-group">
           { images.map((e, index) => (
-            <button key={index} className={"list-group-item list-group-item-action p-0 px-1 pb-1" + (n === index ? " list-group-item-success" : "" )} onClick={() => setN(() => index)}>
+            <button key={index} className={"list-group-item list-group-item-action p-0 px-1 pb-1" + (n === index ? " list-group-item-success" : "" )} onClick={() => { setN(() => index); setAnimate(() => false) }}>
               <span className="fw-bold">{e.date.format('HH:mm')}</span>
             </button>
           ))}
+          <button className="list-group-item list-group-item-action p-0 px-1 pb-1 text-center" onClick={() => setAnimate((prevState: boolean) => !prevState)}>
+            <FontAwesomeIcon icon={animate ? solid("pause") : solid("play")} />
+          </button>
         </ul>
       </div>
     </div>
