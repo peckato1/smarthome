@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
-
+import relativeTime from 'dayjs/plugin/relativeTime'
 import * as model from './model'
 import { RouteBadge, FilterBadge } from './Badges'
 import { useGolemioApiContext } from 'hooks/GolemioApiContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
+
+dayjs.extend(relativeTime)
 
 const REFRESH_INTERVAL_MS = 10 * 1000
 
