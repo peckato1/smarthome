@@ -1,4 +1,6 @@
 import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -84,11 +86,16 @@ function App() {
 }
 
 export default function AppWrapper() {
+  const queryClient = new QueryClient()
+
   return (
-    <OpenWeatherApiContextProvider apiKey={process.env.REACT_APP_OPENWEATHER_APIKEY!} params={{units: 'metric'}}>
-      <GolemioApiContextProvider apiKey={process.env.REACT_APP_GOLEMIO_APIKEY!}>
-        <App />
-      </GolemioApiContextProvider>
-    </OpenWeatherApiContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools initialIsOpen={false} />
+      <OpenWeatherApiContextProvider apiKey={process.env.REACT_APP_OPENWEATHER_APIKEY!} params={{units: 'metric'}}>
+        <GolemioApiContextProvider apiKey={process.env.REACT_APP_GOLEMIO_APIKEY!}>
+          <App />
+        </GolemioApiContextProvider>
+      </OpenWeatherApiContextProvider>
+    </QueryClientProvider>
   )
 }
