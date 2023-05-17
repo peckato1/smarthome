@@ -1,13 +1,8 @@
 import React from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
-
-import OpenWeatherApiContextProvider from 'hooks/OpenWeatherApiContext'
-import GolemioApiContextProvider from 'hooks/GolemioApiContext'
 
 import CurrentDateTime from "components/CurrentDateTime";
 import DepartureBoard from 'components/transport/pid/DepartureBoard';
@@ -62,7 +57,7 @@ function Dashboard() {
   )
 }
 
-function App() {
+export default function App() {
   return (
     <div className="container-fluid" style={{paddingBottom: "75px"}}>
       <header className="row py-1 mb-1 bg-light border-bottom">
@@ -82,20 +77,5 @@ function App() {
         </BrowserRouter>
       </main>
     </div>
-  )
-}
-
-export default function AppWrapper() {
-  const queryClient = new QueryClient()
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
-      <OpenWeatherApiContextProvider apiKey={process.env.REACT_APP_OPENWEATHER_APIKEY!} params={{units: 'metric'}}>
-        <GolemioApiContextProvider apiKey={process.env.REACT_APP_GOLEMIO_APIKEY!}>
-          <App />
-        </GolemioApiContextProvider>
-      </OpenWeatherApiContextProvider>
-    </QueryClientProvider>
   )
 }
