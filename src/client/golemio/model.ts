@@ -61,3 +61,42 @@ export interface Departure {
     stop: Stop
     trip: Trip
 }
+
+export interface Alert {
+    id: string
+    alert: AlertDetail
+}
+
+interface TranslationText {
+    lang: string
+    text: string
+}
+
+interface Translation {
+    translation: TranslationText[]
+}
+
+interface InformedEntity {
+    routeId: string
+}
+
+interface AlertDetail {
+    activePeriod: { start: string, end: string }[]
+    cause: string
+    effect: string
+    descriptionText: Translation
+    headerText: Translation
+    informedEntity: InformedEntity[]
+    url: Translation
+}
+
+interface GtfsRealtimeHeader {
+    gtfsRealtimeVersion: string
+    incrementality: string
+    timestamp: string
+}
+
+export interface GtfsRealtime<T> {
+    entity: T[]
+    header: GtfsRealtimeHeader
+}
