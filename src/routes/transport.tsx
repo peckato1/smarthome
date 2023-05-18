@@ -1,4 +1,6 @@
 import PIDDepartureBoard from 'components/transport/pid/DepartureBoard'
+import { useQuery } from '@tanstack/react-query'
+import * as client from 'client/golemio/client'
 import * as model from 'client/golemio/model'
 import { FilterBadge } from 'components/transport/pid/Badges'
 
@@ -18,10 +20,15 @@ const boards = [
 ]
 
 export default function TransportRoute() {
+  const { data: alertsData } = useQuery<model.GtfsRealtime<model.Alert>>(client.constructQuery('alerts'))
+  const { data: routesData } = useQuery<model.GTFSRoute[]>(client.constructQuery('routes'), {} as any, { staleTime: 1 * 60 * 60 * 1000 })
+
+  const routesByShortName = routesData ? routesData.reduce((p, c) => ({ ...p, [c.route_short_name]: c}), {}) : []
+
   return (
     <table className="table table-sm table-striped table-bordered">
       {boards.map(e => (
-        <PIDDepartureBoard key={e.name} pidStopId={e.name} count={e.count} filters={e.filters} />
+        <PIDDepartureBoard key={e.name} pidStopId={e.name} count={e.count} filters={e.filters} routes={routesByShortName} alerts={alertsData ? alertsData.entity : []} />
       ))}
     </table>
   )

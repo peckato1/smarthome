@@ -145,6 +145,29 @@ function HeaderRow(props: HeaderRowProps) {
   )
 }
 
+function Alert({ alert, stopRoutes } : { alert: model.Alert, stopRoutes: model.GTFSRoute[] }) {
+  const a = alert.alert
+  const activeFrom = dayjs.unix(+a.activePeriod[0].start).format("DD.MM. HH:mm")
+  const activeTo = a.activePeriod[0].end ? dayjs.unix(+a.activePeriod[0].end).format("DD.MM. HH:mm") : "do odvolání"
+  const routes = a.informedEntity.map(e => {
+    const route = stopRoutes.find(r => r.route_id === e.routeId)
+    return route?.route_short_name
+  }).filter((e, i, arr) => e !== undefined && arr.indexOf(e) === i).sort((a, b) => a!.localeCompare(b!, undefined, { numeric: true }))
+
+  return (
+    <tr>
+      <td colSpan={4} className="alert alert-warning">
+        <div className="alert alert-warning m-0 p-2">
+          <strong>
+            {routes.join(", ")}: {a.headerText.translation[0].text}
+          </strong>{' '}
+          ({activeFrom} - {activeTo}): {a.descriptionText.translation[0].text}
+        </div>
+      </td>
+    </tr>
+  )
+}
+
 function ConditionalRow({ visible, children } : { visible: boolean, children: React.ReactNode | React.ReactNode[] }) {
   if (!visible)
     return null
@@ -158,11 +181,16 @@ function ConditionalRow({ visible, children } : { visible: boolean, children: Re
   )
 }
 
+interface ObjectMap<K> {
+  [key: string]: K
+}
+
 interface PIDDepartureBoardProps {
   pidStopId: string
   count: number
   filters: Filter[]
   alerts: model.Alert[]
+  routes: ObjectMap<model.GTFSRoute>
 }
 export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
   const { data, isLoading, error, dataUpdatedAt } = useQuery<model.DepartureBoard>(client.constructQuery('departureBoards', { stopName: props.pidStopId }))
@@ -174,6 +202,9 @@ export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
     }
     return departures.filter(dept => activeFilters.some(filterIndex => props.filters[filterIndex].func(dept)))
   }, [props.filters, activeFilters])
+
+  const routes = data ? data.departures.map(d => props.routes[d.route.short_name]).filter(e => e !== undefined) : []
+  const alerts = props.alerts.filter(a => a.alert.informedEntity.some(e => routes.some(r => r.route_id === e.routeId)))
 
   return (
     <tbody>
@@ -191,6 +222,7 @@ export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
         <Infotexts data={(data as any)?.infotexts} />
       </ConditionalRow>
 
+      { alerts.map(e => <Alert alert={e} stopRoutes={routes} key={e.id} /> ) }
       <Departures departures={data ? filterDepartures((data as any).departures as model.Departure[]).slice(0, props.count) : undefined} />
     </tbody>
   )
