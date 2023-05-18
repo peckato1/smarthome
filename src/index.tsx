@@ -11,7 +11,6 @@ import dayjs from 'dayjs'
 import cs from 'dayjs/locale/cs'
 
 import OpenWeatherApiContextProvider from 'hooks/OpenWeatherApiContext'
-import GolemioApiContextProvider from 'hooks/GolemioApiContext'
 
 import Root from 'routes/root'
 import Dashboard from 'routes/dashboard'
@@ -54,9 +53,7 @@ root.render(
   <QueryClientProvider client={queryClient}>
     <ReactQueryDevtools initialIsOpen={false} position="top-right" />
     <OpenWeatherApiContextProvider apiKey={process.env.REACT_APP_OPENWEATHER_APIKEY!} params={{units: 'metric'}}>
-      <GolemioApiContextProvider apiKey={process.env.REACT_APP_GOLEMIO_APIKEY!}>
-        <RouterProvider router={routes} />
-      </GolemioApiContextProvider>
+      <RouterProvider router={routes} />
     </OpenWeatherApiContextProvider>
   </QueryClientProvider>
 );

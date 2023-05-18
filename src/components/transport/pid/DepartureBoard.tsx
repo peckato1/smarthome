@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import * as model from './model'
-import { RouteBadge, FilterBadge } from './Badges'
-import { useGolemioApiContext } from 'hooks/GolemioApiContext'
+import * as model from 'client/golemio/model'
+import * as client from 'client/golemio/client'
+import { RouteBadge } from './Badges'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 
 dayjs.extend(relativeTime)
-
-const REFRESH_INTERVAL_MS = 10 * 1000
 
 const pad2 = (n: number) => { return (n < 10 ? '0' : '') + n }
 const delayed = (d: model.Departure) => {
@@ -23,7 +22,7 @@ const delayed = (d: model.Departure) => {
   return undefined
 }
 
-function Error({ error }: { error?: Error }) {
+function Error({ error }: { error?: any }) {
   if (!error)
     return <React.Fragment />
 
@@ -116,36 +115,9 @@ interface PIDDepartureBoardProps {
   count: number
   filters: Filter[]
 }
-function PIDDepartureBoard(props: PIDDepartureBoardProps) {
-  const [ time, setTime ] = useState<number>();
-  const [ data, setData ] = useState<any>(undefined);
-  const [ error, setError ] = useState<Error|undefined>(undefined);
-  const { fetchData } = useGolemioApiContext()
+export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
+  const { data, isLoading, error, dataUpdatedAt } = useQuery(client.constructQuery('departureBoards', { stopName: props.pidStopId }))
   const [ activeFilters, setActiveFilters] = useState<number[]>(props.filters.filter(f => f.active === true).map((f, i) => i))
-
-  useEffect(() => {
-    const getData = () => {
-      fetchData('departureboards', { params: { names: props.pidStopId, limit: 40 }})
-        .then((resp) => {
-          setTime(() => Date.now())
-          setData(() => resp.data)
-          setError(() => undefined)
-        })
-        .catch((error) => {
-          setTime(() => Date.now())
-          setData(() => undefined)
-          setError(() => error)
-          console.log(error)
-        })
-      }
-    const interval = setInterval(getData, REFRESH_INTERVAL_MS)
-    getData()
-    return () => {
-      clearInterval(interval);
-    }
-  // eslint-disable-next-line
-  }, []);
-
 
   const filterDepartures = (departures: model.Departure[]) => {
     if (activeFilters.length === 0) {
@@ -179,7 +151,7 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
                     <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => setActiveFilters(() => [])}></button>
                   )}
                 </div>
-                <span className="text-muted"><small>{dayjs(time).format('HH:mm:ss')}</small></span>
+                <span className="text-muted"><small>{dayjs(dataUpdatedAt).format('HH:mm:ss')}</small></span>
               </div>
             </td>
           </tr>
@@ -190,7 +162,7 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
               <Error error={ error } />
             </td>
           </tr>
-          <tr className={!data ? "" : "visually-hidden"}>
+          <tr className={isLoading ? "" : "visually-hidden"}>
             <td colSpan={4}>
               <Loading visible={ data === undefined } />
             </td>
@@ -204,31 +176,4 @@ function PIDDepartureBoard(props: PIDDepartureBoardProps) {
         </tbody>
       </React.Fragment>
   )
-}
-
-const boards = [
-  { name: "Sídliště Červený Vrch", count: 6, filters: [
-    { icon: <FilterBadge type="tram"  direction="down" />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'A', active: true},
-    { icon: <FilterBadge type="tram"  direction="up"   />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'B'},
-  ]},
-  { name: "Bořislavka", count: 6, filters: [
-    { icon: <FilterBadge type="metro" direction="down" />, func: (d: model.Departure) => +d.route.type === 1 && d.stop.platform_code === '1', active: true},
-    { icon: <FilterBadge type="tram"  direction="down" />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'A', active: true},
-    { icon: <FilterBadge type="bus"                    />, func: (d: model.Departure) => +d.route.type === 3},
-    { icon: <FilterBadge type="metro" direction="up"   />, func: (d: model.Departure) => +d.route.type === 1 && d.stop.platform_code === '2'},
-    { icon: <FilterBadge type="tram"  direction="up"   />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'B'},
-  ]},
-  { name: "Nádraží Veleslavín", count: 7, filters: [] },
-]
-
-export default function DepartureBoard() {
-
-  return (
-    <table className="table table-sm table-striped table-bordered">
-      {boards.map(e => (
-        <PIDDepartureBoard key={e.name} pidStopId={e.name} count={e.count} filters={e.filters} />
-      ))}
-    </table>
-  )
-
 }
