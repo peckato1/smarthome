@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import * as model from 'client/golemio/model'
 import * as client from 'client/golemio/client'
 import { RouteBadge } from './Badges'
+import LoadingSpinner from 'components/LoadingSpinner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 
@@ -24,7 +25,7 @@ const delayed = (d: model.Departure) => {
 
 function Error({ error }: { error?: any }) {
   if (!error)
-    return <React.Fragment />
+    return null
 
   console.error(error)
 
@@ -35,22 +36,9 @@ function Error({ error }: { error?: any }) {
   )
 }
 
-function Loading({ visible }: { visible: boolean }) {
-  if (!visible)
-    return <React.Fragment />
-
-  return (
-    <div className="d-flex justify-content-center">
-      <div className="spinner-grow text-primary" role="status">
-        <span className="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  )
-}
-
 function Infotexts({ data }: { data?: model.Infotext[] }) {
   if (!data || data.length === 0)
-    return <React.Fragment />
+    return null
 
   return (
     <ul className="list-group">
@@ -68,10 +56,10 @@ function Infotexts({ data }: { data?: model.Infotext[] }) {
 
 function Departures({ departures }: { departures?: model.Departure[] }) {
   if (!departures)
-    return <React.Fragment />
+    return null
 
   return (
-    <React.Fragment>
+    <>
       {departures.map(d => (
         <tr key={d.stop.id + "/" + d.trip.id}>
           <td className="font-monospace p-0 ps-1">
@@ -93,7 +81,7 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
           </td>
         </tr>
       ))}
-    </React.Fragment>
+    </>
   )
 }
 
@@ -108,6 +96,57 @@ function FilterIcon({ icon, active, onClick }: { icon: React.ReactElement, activ
 
   // eslint-disable-next-line
   return ( <a role="button" className="p-0 ps-1" style={styles} onClick={onClick}> {icon} </a> )
+}
+
+interface HeaderRowProps {
+  stopName: string
+  filters: Filter[]
+  activeFilters: number[]
+  setActiveFilters: React.Dispatch<React.SetStateAction<number[]>>
+  updated: number
+}
+function HeaderRow(props: HeaderRowProps) {
+  const toggleActiveFilter = useCallback((filterIndex: number) => {
+    props.setActiveFilters((prevState: number[]) => {
+      if (!prevState.includes(filterIndex)) {
+        return [...prevState, filterIndex]
+      } else {
+        return prevState.filter((e) => e !== filterIndex)
+      }
+    })
+  }, [props])
+
+  return (
+    <tr className="table-primary">
+      <td colSpan={4}>
+        <div className="d-flex flex-row justify-content-between">
+          <span className="fw-bold">{props.stopName}</span>
+          <div className="btn-group" role="group" aria-label="Filters">
+            { props.filters.map((filter, index) => (
+                <FilterIcon key={index} icon={filter.icon} active={props.activeFilters.length === 0 || props.activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
+            ))}
+            { props.filters.length > 0 && (
+              <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => props.setActiveFilters(() => [])}></button>
+            )}
+          </div>
+          <span className="text-muted"><small>{dayjs(props.updated).format('HH:mm:ss')}</small></span>
+        </div>
+      </td>
+    </tr>
+  )
+}
+
+function ConditionalRow({ visible, children } : { visible: boolean, children: React.ReactNode | React.ReactNode[] }) {
+  if (!visible)
+    return null
+
+  return (
+    <tr>
+      <td colSpan={4}>
+        {children}
+      </td>
+    </tr>
+  )
 }
 
 interface PIDDepartureBoardProps {
@@ -126,54 +165,23 @@ export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
     return departures.filter(dept => activeFilters.some(filterIndex => props.filters[filterIndex].func(dept)))
   }
 
-  const toggleActiveFilter = (filterIndex: number) => {
-    setActiveFilters((prevState: number[]) => {
-      if (!prevState.includes(filterIndex)) {
-        return [...prevState, filterIndex]
-      } else {
-        return prevState.filter((e) => e !== filterIndex)
-      }
-    })
-  }
-
   return (
-      <React.Fragment>
-        <thead key={props.pidStopId}>
-          <tr className="table-primary">
-            <td colSpan={4}>
-              <div className="d-flex flex-row justify-content-between">
-                <span className="fw-bold">{props.pidStopId}</span>
-                <div className="btn-group" role="group" aria-label="Filters">
-                  { props.filters.map((filter, index) => (
-                      <FilterIcon key={index} icon={filter.icon} active={activeFilters.length === 0 || activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
-                  ))}
-                  { props.filters.length > 0 && (
-                    <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => setActiveFilters(() => [])}></button>
-                  )}
-                </div>
-                <span className="text-muted"><small>{dayjs(dataUpdatedAt).format('HH:mm:ss')}</small></span>
-              </div>
-            </td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className={error ? "" : "visually-hidden"}>
-            <td colSpan={4}>
-              <Error error={ error } />
-            </td>
-          </tr>
-          <tr className={isLoading ? "" : "visually-hidden"}>
-            <td colSpan={4}>
-              <Loading visible={ data === undefined } />
-            </td>
-          </tr>
-          <tr className={data && (data as any).infotexts.length > 0 ? "" : "visually-hidden"}>
-            <td colSpan={4}>
-              <Infotexts data={ data ? ((data as any).infotexts as model.Infotext[]) : undefined } />
-            </td>
-          </tr>
-          <Departures departures={data ? filterDepartures((data as any).departures as model.Departure[]).slice(0, props.count) : undefined} />
-        </tbody>
-      </React.Fragment>
+    <tbody>
+      <HeaderRow stopName={props.pidStopId} filters={props.filters} activeFilters={activeFilters} setActiveFilters={setActiveFilters} updated={dataUpdatedAt} />
+
+      <ConditionalRow visible={error !== null}>
+        <Error error={error} />
+      </ConditionalRow>
+
+      <ConditionalRow visible={isLoading === true}>
+        <LoadingSpinner />
+      </ConditionalRow>
+
+      <ConditionalRow visible={data !== undefined && (data as any).infotexts.length > 0}>
+        <Infotexts data={(data as any)?.infotexts} />
+      </ConditionalRow>
+
+      <Departures departures={data ? filterDepartures((data as any).departures as model.Departure[]).slice(0, props.count) : undefined} />
+    </tbody>
   )
 }
