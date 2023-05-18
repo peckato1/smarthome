@@ -1,3 +1,18 @@
+export interface GTFSRoute {
+    agency_id: string
+    is_night: boolean
+    is_regional: boolean
+    is_substitute_transport: boolean
+    route_color: string
+    route_desc: string
+    route_id: string
+    route_long_name: string
+    route_short_name: string
+    route_text_color: string
+    route_type: string
+    route_url: string
+}
+
 export interface Infotext {
     valid_from: string | null
     valid_to: string | null
@@ -23,7 +38,7 @@ export interface LastStop {
     id: string
 }
 
-export interface Route {
+export interface RouteDeptBoard {
     short_name: string
     type: string
     is_night: boolean
@@ -57,7 +72,7 @@ export interface Departure {
     departure_timestamp: DepartureTimestamp
     delay: Delay
     last_stop: LastStop
-    route: Route
+    route: RouteDeptBoard
     stop: Stop
     trip: Trip
 }

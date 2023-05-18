@@ -25,6 +25,10 @@ export const QUERIES = {
         queryKey: ["alerts"],
         queryFn: () => apicall<model.GtfsRealtime<model.Alert[]>>("vehiclepositions/gtfsrt/alerts.json")
     }),
+    routes: () => ({
+        queryKey: ["routes"],
+        queryFn: () => apicall<model.GTFSRoute[]>("/gtfs/routes")
+    }),
 }
 
 export function constructQuery(name: string, queryParams: any = {}, reactQueryParams: any = {}) {
