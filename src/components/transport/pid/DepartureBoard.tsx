@@ -158,12 +158,12 @@ export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
   const { data, isLoading, error, dataUpdatedAt } = useQuery(client.constructQuery('departureBoards', { stopName: props.pidStopId }))
   const [ activeFilters, setActiveFilters] = useState<number[]>(props.filters.filter(f => f.active === true).map((f, i) => i))
 
-  const filterDepartures = (departures: model.Departure[]) => {
+  const filterDepartures = useCallback((departures: model.Departure[]) => {
     if (activeFilters.length === 0) {
       return departures
     }
     return departures.filter(dept => activeFilters.some(filterIndex => props.filters[filterIndex].func(dept)))
-  }
+  }, [activeFilters])
 
   return (
     <tbody>
