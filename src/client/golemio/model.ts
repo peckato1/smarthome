@@ -47,6 +47,11 @@ export interface Trip {
     short_name: string
 }
 
+export interface DepartureBoard {
+    stops: Stop[]
+    departures: Departure[]
+}
+
 export interface Departure {
     arrival_timestamp: DepartureTimestamp
     departure_timestamp: DepartureTimestamp

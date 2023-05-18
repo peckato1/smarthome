@@ -162,9 +162,10 @@ interface PIDDepartureBoardProps {
   pidStopId: string
   count: number
   filters: Filter[]
+  alerts: model.Alert[]
 }
 export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
-  const { data, isLoading, error, dataUpdatedAt } = useQuery(client.constructQuery('departureBoards', { stopName: props.pidStopId }))
+  const { data, isLoading, error, dataUpdatedAt } = useQuery<model.DepartureBoard>(client.constructQuery('departureBoards', { stopName: props.pidStopId }))
   const [ activeFilters, setActiveFilters] = useState<number[]>(props.filters.filter(f => f.active === true).map((f, i) => i))
 
   const filterDepartures = useCallback((departures: model.Departure[]) => {
