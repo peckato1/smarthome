@@ -163,7 +163,7 @@ export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
       return departures
     }
     return departures.filter(dept => activeFilters.some(filterIndex => props.filters[filterIndex].func(dept)))
-  }, [activeFilters])
+  }, [props.filters, activeFilters])
 
   return (
     <tbody>
