@@ -12,15 +12,24 @@ import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 dayjs.extend(relativeTime)
 
 const pad2 = (n: number) => { return (n < 10 ? '0' : '') + n }
-const delayed = (d: model.Departure) => {
-  if (d.delay.is_available && d.delay.seconds && parseInt(d.delay.seconds!) > 0) {
-    let secs = parseInt(d.delay.seconds)
-    let dm = Math.floor(secs / 60)
-    let ds = secs % 60
 
-    return pad2(dm) + ':' + pad2(ds)
+function Delay({ departure } : { departure: model.Departure }) {
+  if (departure.delay.is_available && departure.delay.seconds) {
+    const secs = parseInt(departure.delay.seconds)
+    const dm = Math.floor(Math.abs(secs) / 60)
+    const ds = Math.abs(secs) % 60
+
+    const color = secs < 0 ? "info" : (secs > 180 ? "danger" : "warning")
+    const sign = secs < 0 ? '-' : '+'
+
+    return (
+      <div className={`ms-1 badge text-bg-${color}`}>
+        {sign}&nbsp;{pad2(dm)}:{pad2(ds)}
+      </div>
+    )
   }
-  return undefined
+
+  return null
 }
 
 function Error({ error }: { error?: any }) {
@@ -66,7 +75,7 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
               {dayjs(d.departure_timestamp.scheduled).format('HH:mm')}
           </td>
           <td className="font-monospace p-0 ps-1">
-              {delayed(d) && (<span className="ms-1 badge text-bg-warning">+&nbsp;{delayed(d)}</span>)}
+              <Delay departure={d} />
           </td>
           <td className="p-0 ps-1">
             <small className="">{dayjs(d.departure_timestamp.predicted).fromNow()}</small>
