@@ -83,7 +83,10 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
           <td className="p-0 ps-1">
             <div className="d-flex flex-row">
               <RouteBadge type={d.route.type} name={d.route.short_name} />
-              <span className="fw-bold ms-2 flex-grow-1">{d.trip.headsign}</span>
+              <span className="ms-2 flex-grow-1">
+                <strong>{d.trip.headsign}</strong>{' '}
+                {d.last_stop.name && ( <small>(@{d.last_stop.name})</small> )}
+              </span>
               {d.trip.is_air_conditioned       && ( <div><FontAwesomeIcon className="mx-1" icon={solid("snowflake")} /></div> )}
               {d.trip.is_wheelchair_accessible && ( <div><FontAwesomeIcon className="mx-1" icon={solid("wheelchair")} /></div> )}
             </div>
