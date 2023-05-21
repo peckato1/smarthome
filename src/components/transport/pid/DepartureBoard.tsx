@@ -11,6 +11,8 @@ import { solid } from '@fortawesome/fontawesome-svg-core/import.macro'
 
 dayjs.extend(relativeTime)
 
+const COLSPAN=6
+
 const pad2 = (n: number) => { return (n < 10 ? '0' : '') + n }
 
 function Delay({ departure } : { departure: model.Departure }) {
@@ -87,6 +89,13 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
                 <strong>{d.trip.headsign}</strong>{' '}
                 {d.last_stop.name && ( <small>(@{d.last_stop.name})</small> )}
               </span>
+            </div>
+          </td>
+          <td className="p-0 ps-1">
+            {d.stop.platform_code}
+          </td>
+          <td className="p-0 ps-1">
+            <div className="d-flex flex-row">
               {d.trip.is_air_conditioned       && ( <div><FontAwesomeIcon className="mx-1" icon={solid("snowflake")} /></div> )}
               {d.trip.is_wheelchair_accessible && ( <div><FontAwesomeIcon className="mx-1" icon={solid("wheelchair")} /></div> )}
             </div>
@@ -130,7 +139,7 @@ function HeaderRow(props: HeaderRowProps) {
 
   return (
     <tr className="table-primary">
-      <td colSpan={4}>
+      <td colSpan={COLSPAN}>
         <div className="d-flex flex-row justify-content-between">
           <span className="fw-bold">{props.stopName}</span>
           <div className="btn-group" role="group" aria-label="Filters">
@@ -159,7 +168,7 @@ function Alert({ alert, stopRoutes } : { alert: model.Alert, stopRoutes: model.G
 
   return (
     <tr>
-      <td colSpan={4} className="alert alert-warning">
+      <td colSpan={COLSPAN} className="alert alert-warning">
         <div className="alert alert-warning m-0 p-2">
           <strong>
             {routes.join(", ")}: {a.headerText.translation[0].text}
@@ -177,7 +186,7 @@ function ConditionalRow({ visible, children } : { visible: boolean, children: Re
 
   return (
     <tr>
-      <td colSpan={4}>
+      <td colSpan={COLSPAN}>
         {children}
       </td>
     </tr>
