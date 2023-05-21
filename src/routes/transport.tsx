@@ -22,7 +22,7 @@ const boards = [
     { icon: <FilterBadge type="bus" direction="up"   />, func: (d: model.Departure) => d.stop.platform_code === 'A' },
   ]},
   { name: "Mladá Boleslav,aut.st.", count: 5, filters: [
-    { icon: <FilterBadge type="bus" direction="down" />, func: (d: model.Departure) => ['2', '3', '7', '8', '11', '12', '20'].includes(d.stop.platform_code) },
+    { icon: <FilterBadge type="bus" direction="down" />, func: (d: model.Departure) => ['2', '3', '7', '8', '11', '12', '20'].includes(d.stop.platform_code), active: true },
   ]},
 ]
 
