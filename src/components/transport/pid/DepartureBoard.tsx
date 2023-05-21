@@ -147,7 +147,16 @@ function HeaderRow(props: HeaderRowProps) {
                 <FilterIcon key={index} icon={filter.icon} active={props.activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
             ))}
             { props.filters.length > 0 && (
-              <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => props.setActiveFilters(() => [])}></button>
+              <div className="button-group ms-1" role="group">
+                <button type="button" className="btn btn-default px-2 py-0" aria-label="Clear filters"
+                    onClick={() => props.setActiveFilters(() => [])}>
+                  <FontAwesomeIcon icon={solid("xmark")} />
+                </button>
+                <button type="button" className="btn btn-default px-2 py-0" aria-label="Clear filters"
+                    onClick={() => props.setActiveFilters(() => props.filters.reduce((p, c, i) => c.active ? [...p, i] : p, [] as number[]))}>
+                  <FontAwesomeIcon icon={solid("rotate-right")} />
+                </button>
+              </div>
             )}
           </div>
           <span className="text-muted"><small>{dayjs(props.updated).format('HH:mm:ss')}</small></span>
