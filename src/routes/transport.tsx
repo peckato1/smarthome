@@ -17,6 +17,13 @@ const boards = [
     { icon: <FilterBadge type="tram"  direction="up"   />, func: (d: model.Departure) => +d.route.type === 0 && d.stop.platform_code === 'B'},
   ]},
   { name: "Nádraží Veleslavín", count: 7, filters: [] },
+  { name: "Kosmonosy,nemocnice", count: 5, filters: [
+    { icon: <FilterBadge type="bus" direction="down" />, func: (d: model.Departure) => d.stop.platform_code === 'B', active: true},
+    { icon: <FilterBadge type="bus" direction="up"   />, func: (d: model.Departure) => d.stop.platform_code === 'A' },
+  ]},
+  { name: "Mladá Boleslav,aut.st.", count: 5, filters: [
+    { icon: <FilterBadge type="bus" direction="down" />, func: (d: model.Departure) => ['2', '3', '7', '8', '11', '12', '20'].includes(d.stop.platform_code) },
+  ]},
 ]
 
 export default function TransportRoute() {
