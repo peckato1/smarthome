@@ -135,7 +135,7 @@ function HeaderRow(props: HeaderRowProps) {
           <span className="fw-bold">{props.stopName}</span>
           <div className="btn-group" role="group" aria-label="Filters">
             { props.filters.map((filter, index) => (
-                <FilterIcon key={index} icon={filter.icon} active={props.activeFilters.length === 0 || props.activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
+                <FilterIcon key={index} icon={filter.icon} active={props.activeFilters.includes(index)} onClick={() => toggleActiveFilter(index)} />
             ))}
             { props.filters.length > 0 && (
               <button type="button" className="btn-close" aria-label="Clear filters" onClick={() => props.setActiveFilters(() => [])}></button>
