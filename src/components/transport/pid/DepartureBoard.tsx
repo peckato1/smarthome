@@ -96,8 +96,8 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
           </td>
           <td className="p-0 ps-1">
             <div className="d-flex flex-row">
-              {d.trip.is_air_conditioned       && ( <div><FontAwesomeIcon className="mx-1" icon={solid("snowflake")} /></div> )}
-              {d.trip.is_wheelchair_accessible && ( <div><FontAwesomeIcon className="mx-1" icon={solid("wheelchair")} /></div> )}
+              <div className={!d.trip.is_air_conditioned ? "invisible" : ""}><FontAwesomeIcon className="mx-1" icon={solid("snowflake")} /></div>
+              <div className={!d.trip.is_wheelchair_accessible? "invisible" : ""}><FontAwesomeIcon className="mx-1" icon={solid("wheelchair")} /></div>
             </div>
           </td>
         </tr>
