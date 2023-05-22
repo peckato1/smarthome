@@ -214,7 +214,7 @@ interface PIDDepartureBoardProps {
   routes: ObjectMap<model.GTFSRoute>
 }
 export default function PIDDepartureBoard(props: PIDDepartureBoardProps) {
-  const { data, isLoading, error, dataUpdatedAt } = useQuery<model.DepartureBoard>(client.constructQuery('departureBoards', { stopName: props.pidStopId }))
+  const { data, isLoading, error, dataUpdatedAt } = useQuery<model.DepartureBoard>(client.constructQuery('departureBoards', { stopName: props.pidStopId }, { refetchInterval: 10000, refetchIntervalInBackground: false }))
   const [ activeFilters, setActiveFilters] = useState<number[]>(props.filters.filter(f => f.active === true).map((f, i) => i))
 
   const filterDepartures = useCallback((departures: model.Departure[]) => {

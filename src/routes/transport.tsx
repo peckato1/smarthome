@@ -28,7 +28,7 @@ const boards = [
 
 export default function TransportRoute() {
   const { data: alertsData } = useQuery<model.GtfsRealtime<model.Alert>>(client.constructQuery('alerts'))
-  const { data: routesData } = useQuery<model.GTFSRoute[]>(client.constructQuery('routes'), {} as any, { staleTime: 1 * 60 * 60 * 1000 })
+  const { data: routesData } = useQuery<model.GTFSRoute[]>(client.constructQuery('routes'), {} as any, { refetchInterval: 1 * 60 * 60 * 1000 /* 1 hour */ })
 
   const routesByShortName = routesData ? routesData.reduce((p, c) => ({ ...p, [c.route_short_name]: c}), {}) : []
 
