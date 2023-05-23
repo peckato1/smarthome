@@ -100,8 +100,8 @@ export default function WeatherRadar({ lat, lon } : { lat: number, lon: number }
   return (
     <MapContainer center={[lat, lon]} zoom={7} scrollWheelZoom={false} style={{height: "73vh", width: "100%"}}>
       <TileLayer
-        attribution='&copy; <a href="http://www.mapy.cz">mapy.cz</a> by <a href="http://www.seznam.cz">Seznam.cz</a>, a.s.'
-        url="http://mapserver.mapy.cz/turist-m/{z}-{x}-{y}"
+        attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Images dates={images} bounds={imageBounds} />
     </MapContainer>
