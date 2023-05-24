@@ -72,7 +72,7 @@ function Departures({ departures }: { departures?: model.Departure[] }) {
   return (
     <>
       {departures.map(d => (
-        <tr key={d.stop.id + "/" + d.trip.id}>
+        <tr key={`${d.stop.id}/${d.trip.id}/${d.arrival_timestamp.scheduled}`}>
           <td className="font-monospace p-0 ps-1">
               {dayjs(d.departure_timestamp.scheduled).format('HH:mm')}
           </td>
