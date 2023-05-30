@@ -15,12 +15,5 @@ export default function CurrentDateTime() {
 
   let date = dayjs(today)
 
-  return (
-    <div className="container-fluid d-flex flex-row justify-content-between">
-      <span className="display-6 fw-bold">{date.format('HH:mm:ss')}</span>
-      <span className="display-6 fw-bold">{date.format('dddd D. MMMM')}</span>
-    </div>
-  )
+  return <span className="fs-5 fw-bold">{date.format('dddd, D. MM.  HH:mm:ss')}</span>
 }
-
-

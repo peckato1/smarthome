@@ -27,20 +27,21 @@ function Footer() {
   return (
     <div className="navbar fixed-bottom navbar-expand navbar-dark bg-dark border-top">
       <div className="container-fluid">
-        <React.Fragment>
-          <ul className="nav nav-pills">
-            {segments.map(segm => (
-              <li className="nav-item" key={segm.path}>
-                <NavLink end to={segm.path} className="nav-link me-2" aria-current="page" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title={segm.name}>
-                  {segm.icon}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-          <div>
-            <AppReloadButton />
-          </div>
-        </React.Fragment>
+        <ul className="nav nav-pills">
+          {segments.map(segm => (
+            <li className="nav-item" key={segm.path}>
+              <NavLink end to={segm.path} className="nav-link me-2" aria-current="page" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title={segm.name}>
+                {segm.icon}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+        <div className="navbar-text">
+          <CurrentDateTime />
+        </div>
+        <div>
+          <AppReloadButton />
+        </div>
       </div>
     </div>
   )
@@ -48,10 +49,7 @@ function Footer() {
 
 export default function Root() {
   return (
-    <div className="container-fluid" style={{paddingBottom: "75px"}}>
-      <header className="row py-1 mb-1 bg-light border-bottom">
-        <CurrentDateTime />
-      </header>
+    <div className="container-fluid mt-1" style={{paddingBottom: "75px"}}>
       <main>
         <Outlet />
         <Footer />
